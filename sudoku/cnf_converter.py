@@ -1,6 +1,7 @@
 from os.path import join, isfile, abspath
-from os import listdir
+from os import listdir, unlink
 import subprocess
+import itertools
 
 
 def create_matrix(mypath, graph_name):
@@ -54,14 +55,6 @@ def convert(input_name):
                 line.append(map_to_dimacs(row, col, num))
             lines.append(line)
 
-    #each cell has at most one number assigned
-    # for row in matrix_range:
-    #     for col in matrix_range:
-    #         for num0 in matrix_range:
-    #             for num1 in range(num0+1, size):
-    #                 line = [map_to_dimacs(row, col, num0, negation=True), map_to_dimacs(row, col, num1, negation=True)]
-    #                 lines.append(line)
-
     #a row should contain at least every number
     for num in matrix_range:
         for row in matrix_range:
@@ -73,8 +66,8 @@ def convert(input_name):
     # a row should contain at most every number
     for num in matrix_range:
         for row in matrix_range:
-            for col0 in matrix_range:
-                for col1 in range(col0+1, size):
+            for idx, col0 in enumerate(matrix_range):
+                for col1 in matrix_range[idx+1:]:
                     line = [map_to_dimacs(row, col0, num, negation=True), map_to_dimacs(row, col1, num, negation=True)]
                     lines.append(line)
 
@@ -89,31 +82,38 @@ def convert(input_name):
     #a col should contain at most every number
     for num in matrix_range:
         for col in matrix_range:
-            for row0 in matrix_range:
-                for row1 in range(row0+1, size):
+            for idx, row0 in enumerate(matrix_range):
+                for row1 in matrix_range[idx+1:]:
                     line = [map_to_dimacs(row0, col, num, negation=True), map_to_dimacs(row1, col, num, negation=True)]
                     lines.append(line)
 
-    #an NxN block should contain at least every number
-    for num in matrix_range:
-        for row in matrix_range:
-            line = []
-            for col in matrix_range:
-                row %= size
-                col %= size
-                line.append(map_to_dimacs(row, col, num))
-            lines.append(line)
+    num_blocks = 3
+    block_size = size / num_blocks
+    block_range = range(block_size)
 
-    #an NxN block should contain at most every number
-    for num in matrix_range:
-        for row in matrix_range:
-            for col0 in matrix_range:
-                for col1 in range(col0+1, size):
-                    row %= size
-                    col0 %= size
-                    col1 %= size
-                    line = [map_to_dimacs(row, col0, num, negation=True), map_to_dimacs(row, col1, num, negation=True)]
-                    lines.append(line)
+    for outer_row in block_range:
+        rows = [r + block_size * outer_row for r in block_range]
+        for outer_col in block_range:
+            cols = [c + block_size * outer_col for c in block_range]
+            cartesian = [el for el in itertools.product(rows, cols)]
+            for num in matrix_range:
+                line = []
+                for pair in cartesian:
+                    #an NxN block should contain at least every number
+                    line.append(map_to_dimacs(pair[0], pair[1], num))
+                lines.append(line)
+
+    for outer_row in block_range:
+        rows = [r + block_size * outer_row for r in block_range]
+        for outer_col in block_range:
+            cols = [c + block_size * outer_col for c in block_range]
+            cartesian = [el for el in itertools.product(rows, cols)]
+            #an NxN block should contain at most every number
+            for num in matrix_range:
+                for idx, pair0 in enumerate(cartesian):
+                    for pair1 in cartesian[idx+1:]:
+                        line = [map_to_dimacs(pair0[0], pair0[1], num, negation=True), map_to_dimacs(pair1[0], pair1[1], num, negation=True)]
+                        lines.append(line)
 
     output = create_dimacs_line(lines)
     print output
@@ -125,26 +125,36 @@ def convert(input_name):
     output += create_dimacs_line(lines)
     #print graphs
 
-    mypath = "cnfs"
+    cnfs_path = "cnfs"
+    solutions_path = "solutions"
+    for mypath in [cnfs_path, solutions_path]:
+        for the_file in get_file_names(mypath):
+            file_path = join(mypath, the_file)
+            try:
+                if isfile(file_path):
+                    unlink(file_path)
+                    print "deleted %s" % file_path
+            except Exception, e:
+                print e
+
+
     file_name = '%s___cnf-%s-%s.txt' % (input_name, number_of_variables, number_of_clauses)
-    with open(join(mypath, file_name), 'w') as fh:
+    with open(join(cnfs_path, file_name), 'w') as fh:
         print "writing cnf into %s" % file_name
         fh.write(output)
 
-    file_names = get_file_names(mypath)
-    sat_output_file = abspath(join("solutions", file_name))
+    file_names = get_file_names(cnfs_path)
+    sat_output_file = abspath(join(solutions_path, file_name))
     for file_name in file_names:
-        cmd = "minisat %s %s" % (abspath(join(mypath, file_name)), sat_output_file)
+        cmd = "minisat %s %s" % (abspath(join(cnfs_path, file_name)), sat_output_file)
         print "calling command %s" % cmd
         process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
         output = process.communicate()[0]
         print output
 
-    satisfiable = False
     variables = []
     with open(sat_output_file, 'r') as fh:
-        satisfiable = "SAT" == fh.readline().strip()
-        if satisfiable:
+        if "SAT" == fh.readline().strip():
             line = fh.readline().split(" ")
             for el in line:
                 variables.append(el)
@@ -156,7 +166,8 @@ def convert(input_name):
                 if mapping in variables:
                     matrix[row][col] = num + 1
     print "solution"
-    print matrix
+    for row in matrix_range:
+        print str(matrix[row])
 
 convert("sudoku1.txt")
 
