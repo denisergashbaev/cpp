@@ -15,6 +15,7 @@ def convert_to_cnf(mypath, graph_name):
         number_of_nodes = int(fh.readline())
         connections = {}
         for node_index, line in enumerate(fh):
+            line = line.strip()
             if line == '\n':
                 continue
             if node_index not in connections:
