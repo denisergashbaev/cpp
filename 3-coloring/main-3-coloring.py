@@ -1,6 +1,7 @@
 from dircache import listdir
 from os.path import isfile, join, abspath
 import subprocess
+from file_operations.file_operations import get_file_names
 
 import graph_generator
 import cnf_converter
@@ -11,10 +12,6 @@ def generate_graph():
         for edge_count in [1, 2, 3, 10, 15, 30, 50, 100]:
             if node_count > edge_count:
                 graph_generator.generate_graph(node_count, edge_count)
-
-
-def get_file_names(mypath):
-    return [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
 
 def convert_to_cnf():

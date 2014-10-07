@@ -1,10 +1,12 @@
-from os.path import join, isfile, abspath
-from os import listdir, unlink
-import subprocess
+from os.path import join
 import itertools
+
+from dimacs.dimacs import encode
+from file_operations.file_operations import clean_directories, write_cnf, call_sat_solver, read_sat_output
 
 
 def create_matrix(mypath, graph_name):
+    """reads sudoku into a multidimensional array"""
     matrix = []
     with open(join(mypath, graph_name), 'r') as fh:
         for idx, line in enumerate(fh):
@@ -17,25 +19,14 @@ def create_matrix(mypath, graph_name):
     return matrix
 
 
-def create_dimacs_line(lines):
-    output = ""
-    for line in lines:
-        output += " ".join(line) + " 0\n"
-    return output
-
-
 def map_to_dimacs(row, col, num, negation=False):
     mapping = "x" + str(row) + str(col) + str(num)
     mapping = 81 * row + 9 * col + num + 1
     return ("-" if negation else "") + str(mapping)
 
 
-def get_file_names(mypath):
-    return [f for f in listdir(mypath) if isfile(join(mypath, f))]
-
-
-def convert(input_name):
-    matrix = create_matrix("sudokus", input_name)
+def convert_to_cnf(file_name):
+    matrix = create_matrix("sudokus", file_name)
     size = len(matrix)
     lines = []
     matrix_range = range(size)
@@ -115,59 +106,33 @@ def convert(input_name):
                         line = [map_to_dimacs(pair0[0], pair0[1], num, negation=True), map_to_dimacs(pair1[0], pair1[1], num, negation=True)]
                         lines.append(line)
 
-    output = create_dimacs_line(lines)
+    number_of_vars = size ** 3
+    number_of_clauses = len(lines)
+    output = encode(number_of_vars, number_of_clauses, lines)
     print output
 
-    number_of_variables = size ** 3
-    number_of_clauses = len(lines)
-
-    output = "p cnf %s %s\n" % (number_of_variables, number_of_clauses)
-    output += create_dimacs_line(lines)
     #print graphs
 
     cnfs_path = "cnfs"
     solutions_path = "solutions"
-    for mypath in [cnfs_path, solutions_path]:
-        for the_file in get_file_names(mypath):
-            file_path = join(mypath, the_file)
-            try:
-                if isfile(file_path):
-                    unlink(file_path)
-                    print "deleted %s" % file_path
-            except Exception, e:
-                print e
 
+    cnf_file_name, cnf_full_file_name = write_cnf(cnfs_path, file_name, output, number_of_vars, number_of_clauses)
 
-    file_name = '%s___cnf-%s-%s.txt' % (input_name, number_of_variables, number_of_clauses)
-    with open(join(cnfs_path, file_name), 'w') as fh:
-        print "writing cnf into %s" % file_name
-        fh.write(output)
+    sat_output, sat_output_full_file_name = call_sat_solver(solutions_path, cnf_file_name, cnf_full_file_name)
 
-    file_names = get_file_names(cnfs_path)
-    sat_output_file = abspath(join(solutions_path, file_name))
-    for file_name in file_names:
-        cmd = "minisat %s %s" % (abspath(join(cnfs_path, file_name)), sat_output_file)
-        print "calling command %s" % cmd
-        process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
-        output = process.communicate()[0]
-        print output
-
-    variables = []
-    with open(sat_output_file, 'r') as fh:
-        if "SAT" == fh.readline().strip():
-            line = fh.readline().split(" ")
-            for el in line:
-                variables.append(el)
+    sat_satisfiable, sat_variables = read_sat_output(sat_output_full_file_name)
 
     for row in matrix_range:
         for col in matrix_range:
             for num in matrix_range:
                 mapping = map_to_dimacs(row, col, num)
-                if mapping in variables:
+                if mapping in sat_variables:
                     matrix[row][col] = num + 1
     print "solution"
     for row in matrix_range:
         print str(matrix[row])
-
-convert("sudoku1.txt")
+    with open(sat_output_full_file_name+"_human_readable", 'w') as fh:
+        for row in matrix_range:
+            str_row= str(matrix[row]).strip("[]") + "\n"
+            fh.write(str_row)
 

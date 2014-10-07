@@ -1,17 +1,12 @@
 from os.path import join
+from dimacs.dimacs import encode
+from file_operations.file_operations import write_cnf
 
 
 def map_to_dimacs(i, j, negation=False):
     mapping = "x" + str(i) + str(j)
     mapping = 3 * i + j + 1
     return ("-" if negation else "") + str(mapping)
-
-
-def create_dimacs_line(lines):
-    output = ""
-    for line in lines:
-        output += " ".join(line) + " 0\n"
-    return output
 
 
 def convert_to_cnf(mypath, graph_name):
@@ -51,14 +46,10 @@ def convert_to_cnf(mypath, graph_name):
             for node1 in connections[node0]:
                 lines.append([map_to_dimacs(node0, color, True), map_to_dimacs(node1, color, True)])
 
-    number_of_variables = number_of_nodes * number_of_colors
+    number_of_vars = number_of_nodes * number_of_colors
     number_of_clauses = len(lines)
 
-    output = "p cnf %s %s\n" % (number_of_variables, number_of_clauses)
-    output += create_dimacs_line(lines)
-    #print graphs
+    output = encode(number_of_vars, number_of_clauses, lines)
+    cnf_file_name, cnf_full_file_name = write_cnf("cnfs", graph_name, output, number_of_vars, number_of_clauses)
 
-    file_name = 'cnfs/%s___cnf-%s-%s.txt' % (graph_name, number_of_variables, number_of_clauses)
-    with open(file_name, 'w') as fh:
-        print "writing cnf into %s" % file_name
-        fh.write(output)
+    return cnf_file_name, cnf_full_file_name
