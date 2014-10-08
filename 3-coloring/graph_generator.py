@@ -43,7 +43,7 @@ def generate_graph(node_count, edge_count):
 
     output = str(node_count) + "\n"
     output += create_graph_line(lines)
-    graph_file_name = "graph-%s-%s" % (node_count, edge_count)
+    graph_file_name = "graph-%03d-%03d" % (node_count, edge_count)
     with open(join("graphs", graph_file_name), 'w') as fh:
         fh.write(output)
     return graph_file_name
