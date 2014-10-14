@@ -16,6 +16,9 @@ class Literal(CommonEqualityMixin):
     def get_sign(self):
         return copysign(1, self.literal)
 
+    def get_inverse(self):
+        return Literal(self.literal * -1)
+
     def __repr__(self):
         return str(self.literal)
 
@@ -26,6 +29,9 @@ class Clause(CommonEqualityMixin):
 
     def add_literal(self, literal):
         self.literals.append(literal)
+
+    def remove_literal(self, remove_literal):
+        self.literals[:] = [l for l in self.literals if l != remove_literal]
 
     def is_unit_clause(self):
         return len(self.literals) == 1
@@ -48,6 +54,9 @@ class Clause(CommonEqualityMixin):
             print "original literals %s, new literals %s" % (self.literals, new_literals)
         self.literals = new_literals
 
+    def is_empty(self):
+        return len(self.literals) == 0
+
     def __repr__(self):
         return str(self.__class__) + ": " + str(self.literals)
 
@@ -69,31 +78,41 @@ class Formula:
     def get_non_unit_clauses(self):
         return [clause for clause in self.clauses if not clause.is_unit_clause()]
 
-    def is_contradiction(self):
-        unit_clauses = self.get_unit_clauses()
-        for idx, clause1 in enumerate(unit_clauses):
-            for clause2 in unit_clauses[idx+1:]:
-                if clause1.literals[0].is_inverse(clause2.literals[0]):
-                    return True
-        return False
+    def get_literals(self):
+        literals = []
+        for clause in self.clauses:
+            for literal in clause.literals:
+                literals.append(literal)
+        return literals
 
     def is_empty(self):
         return len(self.clauses) == 0
 
+    def has_empty_clause(self):
+        return len([clause for clause in self.clauses if clause.is_empty()]) > 0
+
     # http://stackoverflow.com/questions/1207406/remove-items-from-a-list-while-iterating-in-python
-    def remove_unit_clause(self, unit_clause):
+    def remove_clauses_containing(self, literal):
         """
         :type unit_clause:Clause
         """
         new_clauses = []
         for clause in self.clauses:
-            l = unit_clause.literals[0]
-            if clause.contains_literal(l):
-                print "removing clause %s because it's deactivated through unit_clause %s" % (clause, l)
-            elif unit_clause != clause:
-                clause.remove_inverse_literals(l)
+            if clause.contains_literal(literal):
+                print "removing clause %s because it's deactivated through unit_clause %s" % (clause, literal)
+            else:
                 new_clauses.append(clause)
         self.clauses = new_clauses
+
+    def remove_literals_from_clauses(self, remove_literal):
+        for clause in self.clauses:
+            new_literals = []
+            for literal in clause.literals:
+                if remove_literal == literal:
+                    print "removing literal %s from the clause %s" % (literal, clause)
+                else:
+                    new_literals.append(literal)
+            clause.literals[:] = new_literals
 
 
     def __repr__(self):
