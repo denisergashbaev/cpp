@@ -34,7 +34,7 @@ cnf_files = ["only_unit_clauses--not_satisfiable.txt",
 for cnf_file in cnf_files:
     print "=================\n"
     print "reading file %s\n" % cnf_file
-    recurse(dimacs_reader.read_cnf_output("", cnf_file))
+    recurse(dimacs_reader.read_cnf_output("cnfs", cnf_file))
 
 
 
