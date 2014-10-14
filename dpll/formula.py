@@ -6,16 +6,6 @@ class Literal(CommonEqualityMixin):
     def __init__(self, literal):
         self.literal = int(literal)
 
-    def is_inverse(self, other_literal):
-        """
-        :type other_literal:Literal
-        """
-        return abs(self.literal) == abs(other_literal.literal) \
-            and self.get_sign() != other_literal.get_sign()
-
-    def get_sign(self):
-        return copysign(1, self.literal)
-
     def get_inverse(self):
         return Literal(self.literal * -1)
 
@@ -30,29 +20,11 @@ class Clause(CommonEqualityMixin):
     def add_literal(self, literal):
         self.literals.append(literal)
 
-    def remove_literal(self, remove_literal):
-        self.literals[:] = [l for l in self.literals if l != remove_literal]
-
     def is_unit_clause(self):
         return len(self.literals) == 1
 
     def contains_literal(self, literal):
         return literal in self.literals
-
-    # http://stackoverflow.com/questions/1207406/remove-items-from-a-list-while-iterating-in-python
-    def remove_inverse_literals(self, remove_literal):
-        """
-        :type remove_literal:Literal
-        """
-        new_literals = []
-        for literal in self.literals:
-            if not literal.is_inverse(remove_literal):
-                new_literals.append(literal)
-            else:
-                print "removing literal %s (inverse of %s) from the clause %s" % (literal, remove_literal, self)
-        if self.literals != new_literals:
-            print "original literals %s, new literals %s" % (self.literals, new_literals)
-        self.literals = new_literals
 
     def is_empty(self):
         return len(self.literals) == 0
