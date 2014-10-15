@@ -25,6 +25,22 @@ def map_to_dimacs(row, col, num, negation=False):
     return ("-" if negation else "") + str(mapping)
 
 
+def write_human_readable(matrix_range, sat_variables, matrix, sat_output_full_file_name):
+    for row in matrix_range:
+        for col in matrix_range:
+            for num in matrix_range:
+                mapping = map_to_dimacs(row, col, num)
+                if mapping in sat_variables:
+                    matrix[row][col] = num + 1
+    print "solution"
+    for row in matrix_range:
+        print str(matrix[row])
+    with open(sat_output_full_file_name+"_human_readable", 'w') as fh:
+        for row in matrix_range:
+            str_row= str(matrix[row]).strip("[]") + "\n"
+            fh.write(str_row)
+
+
 def convert_to_cnf(file_name):
     matrix = create_matrix("sudokus", file_name)
     size = len(matrix)
@@ -122,17 +138,5 @@ def convert_to_cnf(file_name):
 
     sat_satisfiable, sat_variables = read_sat_output(sat_output_full_file_name)
 
-    for row in matrix_range:
-        for col in matrix_range:
-            for num in matrix_range:
-                mapping = map_to_dimacs(row, col, num)
-                if mapping in sat_variables:
-                    matrix[row][col] = num + 1
-    print "solution"
-    for row in matrix_range:
-        print str(matrix[row])
-    with open(sat_output_full_file_name+"_human_readable", 'w') as fh:
-        for row in matrix_range:
-            str_row= str(matrix[row]).strip("[]") + "\n"
-            fh.write(str_row)
+    write_human_readable(matrix_range, sat_variables, matrix, sat_output_full_file_name)
 
