@@ -1,5 +1,5 @@
 from os.path import join
-from dpll.formula import Formula, Clause, Literal
+from formula import Formula, Clause, Literal
 
 
 def read_cnf_output(cnf_path, cnf_file_name):

@@ -1,56 +1,29 @@
-from copy import deepcopy
+from os.path import join
 import dimacs_reader
-from dpll.formula import Clause
+import dpll
+from file_operations.file_operations import call_sat_solver, read_sat_output, get_file_names
+
+if __name__ == "__main__":
+
+    solutions_path = "solutions"
+    cnfs_path = join("..", "3-coloring", "cnfs")
 
 
-def unit_propagation(formula):
-    """:type : dpll.formula.Formula"""
-    while True:
-        unit_clauses = formula.get_unit_clauses()
-        if not unit_clauses:
-            break
-        literal = unit_clauses[0].literals[0]
-        formula.remove_clauses_containing(literal)
-        formula.remove_literals_from_clauses(literal.get_inverse())
+    for cnf_file in get_file_names(cnfs_path):
+        print "=================\n"
+        print "reading file %s\n" % cnf_file
+        mysat_satisfiable, solution_formula = dpll.dpll(dimacs_reader.read_cnf_output(cnfs_path, cnf_file))
+        mysat_variables = [str(el.literal) for el in solution_formula.solution]
 
+        print ">>>"
+        sat_file_name = cnf_file + "_sat"
+        _, sat_output_full_file_name = call_sat_solver(solutions_path, sat_file_name, join(cnfs_path, cnf_file))
+        minisat_satisfiable, minisat_variables = read_sat_output(sat_output_full_file_name)
 
-def select_literal(formula):
-    return formula.get_literals()[0]
-
-
-def dpll(original_formula, propagation_literal=None):
-    """
-    :type original_formula:dpll.formula.Formula
-    """
-    formula = deepcopy(original_formula)
-    if propagation_literal:
-        new_clause = Clause()
-        new_clause.add_literal(propagation_literal)
-        formula.add_clause(new_clause)
-
-    unit_propagation(formula)
-
-    if formula.is_empty():
-        print "satisfiable"
-        return True
-    elif formula.has_empty_clause():
-        print "not satisfiable: %s " % formula
-        return False
-
-    propagation_literal = select_literal(formula)
-
-    return dpll(formula, propagation_literal) or dpll(formula, propagation_literal.get_inverse())
-
-cnf_files = ["only_unit_clauses--not_satisfiable.txt",
-         "only_unit_clauses--satisfiable.txt",
-         "non_unit_clauses--satisfiable.txt",
-         "graph-010-003___cnf-30-118.txt",
-         "graph-010-010___cnf-30-196.txt"]
-
-for cnf_file in cnf_files:
-    print "=================\n"
-    print "reading file %s\n" % cnf_file
-    dpll(dimacs_reader.read_cnf_output("cnfs", cnf_file))
-
-
-
+        suffix = "_ERRROR" if mysat_satisfiable != minisat_satisfiable else "_GOOD"
+        output = "SAT" if mysat_satisfiable else "UNSAT"
+        if mysat_satisfiable:
+            output += "\n"
+            output += " ".join(mysat_variables) + " 0"
+        with open(join(solutions_path, cnf_file+"_mysat_"+suffix), 'w') as fh:
+            fh.write(output)

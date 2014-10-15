@@ -1,5 +1,4 @@
-from math import copysign
-from dpll.CommonEqualityMixin import CommonEqualityMixin
+from CommonEqualityMixin import CommonEqualityMixin
 
 
 class Literal(CommonEqualityMixin):
@@ -37,6 +36,10 @@ class Formula:
     def __init__(self):
         """:type: clauses of [Clause]"""
         self.clauses = []
+        self.solution = []
+
+    def add_solution(self, literal):
+        self.solution.append(literal)
 
     def add_clause(self, clause):
         self.clauses.append(clause)

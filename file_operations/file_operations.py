@@ -42,7 +42,7 @@ def read_sat_output(sat_output_full_file_name):
     with open(sat_output_full_file_name, 'r') as fh:
         satisfiable = "SAT" == fh.readline().strip()
         if satisfiable:
-            line = fh.readline().split(" ")
+            line = fh.readline().rstrip("0\n").strip().split(" ")
             for el in line:
                 variables.append(el)
     return satisfiable, variables
