@@ -3,7 +3,7 @@ class Pile(object):
         self.cards = []
 
     def add_card(self, card):
-        self.cards.append(card)
+        self.cards.insert(0, card)
 
     def is_empty(self):
         return len(self.cards) == 0

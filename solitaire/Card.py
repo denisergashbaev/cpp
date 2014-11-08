@@ -24,10 +24,10 @@ class Suit(object):
     names = ("spades", "clubs", "diamonds", "hearts")
 
     def __init__(self, value):
-        self.name = Suit.names[value]
+        self.value = value
 
     def __repr__(self):
-        return self.name[:1]
+        return Suit.names[self.value][:1]
 
 
 class Card(object):
@@ -35,6 +35,10 @@ class Card(object):
         self.suit = Suit(suit)
         self.rank = rank
         self.index = index
+
+    def is_valid_neighbor(self, other, max_rank):
+        diff = abs(self.rank - other.rank) % max_rank
+        return diff == 1 or diff == max_rank
 
     def __repr__(self):
         return "%s:%s" % (self.rank, self.suit)
