@@ -16,8 +16,8 @@ class CardMapper(object):
     def get_card(self, index):
         return self.index_to_card[index]
 
-    def get_max_card(self):
-        return max(self.index_to_card.iteritems(), key=operator.itemgetter(0))[1]
+    def get_first_card(self):
+        return self.first_card
 
 
 class Suit(object):
@@ -36,9 +36,11 @@ class Card(object):
         self.rank = rank
         self.index = index
 
-    def is_valid_neighbor(self, other, max_rank):
-        diff = abs(self.rank - other.rank) % max_rank
-        return diff == 1 or diff == max_rank
+    def is_valid_neighbor(self, other, num_ranks):
+        min_v = min(self.rank, other.rank)
+        max_v = max(self.rank, other.rank)
+        diff = max_v - min_v
+        return diff == 1 or (min_v == 0 and max_v == num_ranks - 1)
 
     def __repr__(self):
-        return "%s:%s" % (self.rank, self.suit)
+        return "%s:%s-%s" % (self.rank, self.suit, self.index)

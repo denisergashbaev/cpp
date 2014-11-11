@@ -1,12 +1,18 @@
 class Pile(object):
     def __init__(self):
-        self.cards = []
+        self.__cards = []
 
     def add_card(self, card):
-        self.cards.insert(0, card)
+        self.__cards.append(card)
+
+    def get_reversed_cards(self):
+        return self.__cards[::-1]
+
+    def get_cards(self):
+        return self.__cards
 
     def is_empty(self):
-        return len(self.cards) == 0
+        return len(self.__cards) == 0
 
     def __repr__(self):
-        return self.__class__.__name__ + ": " + str(self.cards)
+        return self.__class__.__name__ + ": " + str(self.__cards)

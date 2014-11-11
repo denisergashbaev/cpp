@@ -1,5 +1,6 @@
 class Stack(object):
     def __init__(self, first_card):
+        self.first_card = first_card
         self.cards = [first_card]
 
     def add_card(self, card):
