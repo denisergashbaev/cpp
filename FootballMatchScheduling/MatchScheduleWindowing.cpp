@@ -61,6 +61,7 @@ public:
 		return new Basic(share, *this);
 	}
 	void print(void) const {
+		std::cout << "Printing solutions: " << std::endl;
 		std::cout << V << std::endl;
 		std::cout << V.size() << std::endl;
 		for (int i = 0; i < n; i++) {
@@ -78,7 +79,6 @@ int main(int argc, char* argv[]) {
 	Basic* m = new Basic;
 	DFS<Basic> e(m);
 	delete m;
-	std::cout << "Printing solutions: " << std::endl;
 	/* one solution*/
 	if (Basic* s = e.next()) {
 		s->print();
