@@ -1,17 +1,15 @@
 /*
- * Schedule.h
+ * MatchScheduleSimple.h
  *
- *  Created on: Nov 13, 2014
+ *  Created on: Nov 17, 2014
  *      Author: denis
  */
 
-#ifndef SCHEDULE_H_
-#define SCHEDULE_H_
+#ifndef MATCHSCHEDULESIMPLE_H_
+#define MATCHSCHEDULESIMPLE_H_
 
-class Schedule {
-public:
-	Schedule();
-	virtual ~Schedule();
-};
 
-#endif /* SCHEDULE_H_ */
+
+
+
+#endif /* MATCHSCHEDULESIMPLE_H_ */

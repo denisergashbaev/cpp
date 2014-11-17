@@ -3,17 +3,17 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-O_SRCS += \
-../Schedule.o 
-
 CPP_SRCS += \
-../Schedule.cpp 
+../MatchScheduleSimple.cpp \
+../MatchScheduleWindowing.cpp 
 
 OBJS += \
-./Schedule.o 
+./MatchScheduleSimple.o \
+./MatchScheduleWindowing.o 
 
 CPP_DEPS += \
-./Schedule.d 
+./MatchScheduleSimple.d \
+./MatchScheduleWindowing.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

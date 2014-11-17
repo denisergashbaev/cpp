@@ -10,7 +10,7 @@ class Basic: public Space {
 protected:
 	IntVarArray V;
 public:
-	Basic(void) :
+	Basic(void):
 			V(*this, n * (n - 1), 0, n - 1) {
 
 		Matrix<IntVarArray> X(V, n - 1, n);
@@ -39,6 +39,16 @@ public:
 			}
 		}
 
+		//additional windowing constraint
+		const int numTeams = 4;
+		IntSet teams = IntSet(0, numTeams-1);
+		std::cout << teams << std::endl;
+		for (int col = 0; col + numTeams < X.width(); col++) {
+			for (int row = 0; row < numTeams - 1; row++) {
+				//4-1 for one team is implicitly there
+				count(*this, X.slice(col, col+numTeams, row, row+1), teams, IRT_LE, numTeams-1);
+			}
+		}
 		//Search
 		branch(*this, V, INT_VAR_SIZE_MIN(), INT_VAL_MIN());
 	}
@@ -68,6 +78,7 @@ int main(int argc, char* argv[]) {
 	Basic* m = new Basic;
 	DFS<Basic> e(m);
 	delete m;
+	std::cout << "Printing solutions: " << std::endl;
 	/* one solution*/
 	if (Basic* s = e.next()) {
 		s->print();
