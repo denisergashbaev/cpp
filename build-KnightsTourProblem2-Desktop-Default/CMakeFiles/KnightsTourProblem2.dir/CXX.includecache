@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/denis/Dropbox/upc/cpp/constraint_programming/projects/KnightsTourProblem2/main.cpp
+gecode/int.hh
+-
+gecode/minimodel.hh
+-
+gecode/search.hh
+-
+algorithm
+-
+iterator
+-
+

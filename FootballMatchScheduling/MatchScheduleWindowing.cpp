@@ -5,7 +5,7 @@
 //Football match scheduling problem. Find optimal schedule.
 //Additional constraint: 4 teams cannot play immediately with each other without a break inbetween
 using namespace Gecode;
-const int n = 6;
+const int n = 10;
 class Basic: public Space {
 protected:
 	IntVarArray V;
