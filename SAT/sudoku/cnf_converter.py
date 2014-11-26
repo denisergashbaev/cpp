@@ -1,8 +1,7 @@
 from os.path import join
 import itertools
 
-from dimacs.dimacs import encode
-from file_operations.file_operations import clean_directories, write_cnf, call_sat_solver, read_sat_output
+from SAT.dimacs.dimacs import encode
 
 
 def create_matrix(mypath, graph_name):

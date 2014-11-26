@@ -1,5 +1,5 @@
-from file_operations.file_operations import get_file_names, clean_directories
-import cnf_converter
+from SAT.file_operations.file_operations import get_file_names, clean_directories
+from SAT.sudoku import cnf_converter
 
 clean_directories(["cnfs", "solutions"])
 

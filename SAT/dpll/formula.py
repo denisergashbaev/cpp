@@ -1,4 +1,4 @@
-from CommonEqualityMixin import CommonEqualityMixin
+from SAT.dpll import CommonEqualityMixin
 
 
 class Literal(CommonEqualityMixin):

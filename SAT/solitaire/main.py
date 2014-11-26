@@ -1,9 +1,11 @@
 from os.path import join
-from dimacs import dimacs
+
 from file_operations import file_operations
 from solitaire.Card import CardMapper
 from solitaire.Pile import Pile
 from solitaire.Stack import Stack
+from SAT.dimacs import dimacs
+
 
 class DimacsMapper(object):
 
