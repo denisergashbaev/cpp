@@ -91,14 +91,22 @@ public:
 	}
 
 	void print(void) const {
+		int a[V.size()];
+		for (int i = 0, counter = 0; i < V.size(); i++) {
+			int pos = V[i].val();
+			a[pos] = counter++;
+		}
 		std::cout << "Printing solutions: " << std::endl;
 		std::cout << V << std::endl;
-		std::cout << V.size() << std::endl;
-		for (int col = 0; col < n; col++) {
-			for (int row = 0; row < n; row++) {
-				std:cout <<
+		std::cout << "size: " << V.size() << std::endl;
+
+		for (int i = 0; i < V.size(); i++) {
+			if (i % n == 0) {
+				std::cout<< std::endl;
 			}
+			std::cout << a[i] << " ";
 		}
+		std::cout<< std::endl;
 	}
 };
 
