@@ -1,6 +1,6 @@
 from os.path import join
 
-from SAT.dimacs.dimacs import encode
+from dimacs.dimacs import encode
 from file_operations.file_operations import write_cnf
 
 

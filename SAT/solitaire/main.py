@@ -4,7 +4,7 @@ from file_operations import file_operations
 from solitaire.Card import CardMapper
 from solitaire.Pile import Pile
 from solitaire.Stack import Stack
-from SAT.dimacs import dimacs
+from dimacs import dimacs
 
 
 class DimacsMapper(object):

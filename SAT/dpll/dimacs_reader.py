@@ -1,6 +1,6 @@
 from os.path import join
 
-from SAT.dpll.formula import Formula, Clause, Literal
+from dpll.formula import Formula, Clause, Literal
 
 
 def read_cnf_output(cnf_path, cnf_file_name):

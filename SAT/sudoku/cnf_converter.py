@@ -1,7 +1,7 @@
 from os.path import join
 import itertools
 
-from SAT.dimacs.dimacs import encode
+from dimacs.dimacs import encode
 
 
 def create_matrix(mypath, graph_name):

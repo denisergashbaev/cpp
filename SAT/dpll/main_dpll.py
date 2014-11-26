@@ -1,6 +1,6 @@
 from os.path import join
 
-from SAT.dpll import dpll
+from dpll import dpll
 import dimacs_reader
 from file_operations.file_operations import call_sat_solver, read_sat_output, get_file_names
 from sudoku.cnf_converter import create_matrix, write_human_readable
