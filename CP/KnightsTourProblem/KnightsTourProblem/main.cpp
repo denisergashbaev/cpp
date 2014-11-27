@@ -17,7 +17,7 @@ public:
 		Matrix<IntVarArray> X(V, n, n);
 
 		//constraints
-		circuit(*this, V);
+        circuit(*this, V);
 		for (int col = 0; col < X.width(); col++) {
 			for (int row = 0; row < X.height(); row++) {
 				//std::cout << "checking row,col: " <<row << " " << col << std::endl;
