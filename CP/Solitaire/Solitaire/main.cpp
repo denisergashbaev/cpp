@@ -1,122 +1,148 @@
+#include <gecode/driver.hh>
 #include <gecode/int.hh>
 #include <gecode/minimodel.hh>
-#include <gecode/search.hh>
-#include <algorithm>
-#include <iterator>
-
-//Knights Tour Problem
+#include <iostream>
+#include <vector>
 using namespace Gecode;
-const int n = 10;
-class Basic: public Space {
+
+int numSuits;
+int numRanks;
+std::vector<int> inputDeck;
+int stackSize = 3;
+
+
+int getSuit(int index){
+    return index / numRanks;
+}
+
+int getRank(int index){
+    return index % numRanks;
+}
+
+bool isValidNeighbor(int rank, int otherRank, int numRanks) {
+    int minRank = std::min(rank, otherRank);
+    int maxRank = std::max(rank, otherRank);
+    int diff = maxRank - minRank;
+    return diff == 1 || (minRank == 0 && maxRank == numRanks - 1);
+}
+
+void printSolitareInput(std::vector <int> cardIndexes){
+    int stackCount = cardIndexes.size()/stackSize;
+    for (int i=0; i<stackCount; i++) {
+        for (int j=0; j < stackSize; j++) {
+            //std::cout << "index: " << stackCount * i + j << std::endl;
+            int card = cardIndexes[stackSize * i + j];
+            std::cout<<"(r:" << getRank(card) << ",s:" << getSuit(card) << ",i:" << card << ")" <<"\t";
+        }
+        std::cout<<std::endl;
+    }
+}
+
+void printSolitaireSolution(IntVarArray V, std::vector <int> cardIndexes) {
+    for (int i = 0; i < V.size(); i++) {
+        for (int j = 0; j < V.size(); j++) {
+            int value = V[j].val();
+            if (i == value) {
+                std::cout<<"(r:" << getRank(cardIndexes[j]) << ",s:" << getSuit(cardIndexes[j]) << ",i:" << value << ")" << std::endl;
+                break;
+            }
+        }
+    }
+}
+
+class Solitare : public Space {
+
 protected:
     IntVarArray V;
 public:
-    Basic(void) :
-        V(*this, n * n, 0, n*n-1) {
+    Solitare() : V(*this, numSuits * numRanks - 1, 0, numSuits * numRanks - 2) {
+        std::cout << V << std::endl;
 
-        Matrix<IntVarArray> X(V, n, n);
+        //Constraints:
+        //1. the positions should be distinct
+        distinct(*this, V);
 
-        //constraints
-        circuit(*this, V);
-        for (int col = 0; col < X.width(); col++) {
-            for (int row = 0; row < X.height(); row++) {
-                //std::cout << "checking row,col: " <<row << " " << col << std::endl;
-                std::vector<int> moves = validMoves(row, col, X);
-                int a[moves.size()];
-
-                //std::cout << "valid moves (vector): ";
-                for (std::vector<int>::size_type i = 0; i != moves.size();
-                     i++) {
-                    //std::cout << moves[i] << " ";
-                    a[i] = moves[i];
-                }
-
-                IntSet validMovesSet = IntSet(a, moves.size());
-                std::cout << "valid moves (intset): " << validMovesSet
-                          << std::endl;
-
-                dom(*this, X(col, row), validMovesSet);
+        //2. in each deck, the bottom card can only have a higher position than the card that is on top of it:
+        //that is, it may only be placed on the deck if the card before it is already on the deck and thus has uncovered it
+        int stackCount = V.size()/stackSize;
+        for(int i = 0; i < stackCount; i++) {
+            std::cout << "deck " << i << std::endl;
+            for (int j = 0; j < stackSize - 1; j++) {
+                int index0 = stackSize * i + j;
+                int index1 = index0 + 1;
+                int card0 = inputDeck[index0];
+                int card1 = inputDeck[index1];
+                std::cout << "constraining " << getRank(card0) << ":" << getSuit(card0) << " and " << getRank(card1) << ":" << getSuit(card1) << std::endl;
+                rel(*this, V[index0] > V[index1]);
             }
         }
 
-        std::cout << V << std::endl;
+        //3. If two cards have a "rank jump" with a value of more than 1 unit, they can not be consequtive
+        for (int i = 0; i < V.size(); i++) {
+            if (i == 0) {
+                int index0 = 0;
+                int index1 = inputDeck[i];
+                if (!isValidNeighbor(getRank(index0), getRank(index1), numRanks)){
+                    rel(*this, abs(0 - V[index1]) > 1);
+                }
+            }
+            for (int j = i + 1; j < V.size(); j++) {
+                int index0 = inputDeck[i];
+                int index1 = inputDeck[j];
+                if (!isValidNeighbor(getRank(index0), getRank(index1), numRanks)){
+                    rel(*this, abs(V[i] - V[j]) > 1);
+                }
+            }
+        }
         //Search
-        branch(*this, V, INT_VAR_SIZE_MIN(), INT_VAL_MIN());
+        branch(*this, V, INT_VAR_NONE(), INT_VAL_MIN());
     }
 
-    Basic(bool share, Basic& s) :
-        Space(share, s) {
+    Solitare(bool share, Solitare& s) : Space(share, s) {
         V.update(*this, share, s.V);
     }
     virtual Space* copy(bool share) {
-        return new Basic(share, *this);
+        return new Solitare(share,*this);
     }
-
-    bool isValid(int row, int col, Matrix<IntVarArray> X) {
-        bool ret = row >= 0 && row < X.height() && col >= 0 && col < X.width();
-        //		std::cout << "is valid: " << row << " " << col << std::endl;
-        //		std::cout << ret << std::endl;
-        return ret;
-    }
-
-    int encode(int row, int col, Matrix<IntVarArray> X) {
-        return row * X.height() + col;
-    }
-
-    std::vector<int> validMoves(int row, int col, Matrix<IntVarArray> X) {
-        const int iCount = 2;
-        const int jCount = 8;
-        int tempMoves[iCount][jCount] = {
-            //x coordinates
-            { row + 1, row - 1, row + 2, row - 2, row + 2, row - 2, row + 1,
-              row - 1 },
-            //y coordinates
-            { col - 2, col - 2, col - 1, col - 1, col + 1, col + 1, col + 2,
-              col + 2 }
-            //
-        };
-        std::vector<int> v;
-        for (int j = 0; j < jCount; j++) {
-            int r = tempMoves[0][j];
-            int c = tempMoves[1][j];
-            if (isValid(r, c, X)) {
-                //std::cout << "row,col->r,c: " << row << "," << col << "=>" << r << "," << c << std::endl;
-                int encoded = encode(r, c, X);
-                //std::cout << "r,c->encoded: " << r << "," << c << "=>"
-                //<< encoded << std::endl;
-                v.push_back(encoded);
-            }
-        }
-        return v;
-    }
-
     void print(void) const {
-        int a[V.size()];
-        for (int i = 0, counter = 0; i < V.size(); i++) {
-            int pos = V[i].val();
-            a[pos] = counter++;
-        }
-        std::cout << "Printing solutions: " << std::endl;
-        std::cout << V << std::endl;
-        std::cout << "size: " << V.size() << std::endl;
+        std::cout << "V: " << V << std::endl;
+        std::cout << "V.size=" << V.size() << std::endl;
 
-        for (int i = 0; i < V.size(); i++) {
-            if (i % n == 0) {
-                std::cout<< std::endl;
-            }
-            std::cout << a[i] << " ";
-        }
-        std::cout<< std::endl;
+        std::cout << std::endl << "Solution: " << std::endl;
+        printSolitaireSolution(V, inputDeck);
     }
 };
 
-int main(int argc, char* argv[]) {
-    Basic* m = new Basic;
-    DFS<Basic> e(m);
-    delete m;
-    /* one solution*/
-    if (Basic * s = e.next()) {
-        s->print();
-        delete s;
+
+
+int main(int argc, char** argv){
+    if(argc !=2){
+        std::cout<< "The only parameter should be the file name: "<<std::endl;
+        exit(1);
     }
+
+    std::ifstream fin;
+    fin.open(argv[1]);
+    int temp;
+    fin >> numSuits >> numRanks;
+    std::cout << "Number of suits: "<< numSuits <<std::endl;
+    std::cout << "Number of ranks: "<< numRanks <<std::endl;
+
+    for (int i = 0; i<numSuits*numRanks-1; i++ ){
+        fin >> temp;
+        //std::cout << temp << " "<< std::endl;
+        inputDeck.push_back(temp);
+    }
+    std::cout << std::endl << "Input: " << std::endl;
+    printSolitareInput(inputDeck);
+
+    Solitare* s = new Solitare;
+    DFS<Solitare> e(s);
+    delete s;
+    std::cout << "Printing solution (if available): " << std::endl;
+    if(Solitare* t = e.next()){
+        t->print();
+        delete t;
+    }
+    return 0;
 }

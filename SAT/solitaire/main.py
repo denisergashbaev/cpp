@@ -44,7 +44,8 @@ def main():
     solutions_dir = "solutions"
     cnfs_dir = "cnfs"
     file_operations.clean_directories([solutions_dir, cnfs_dir])
-    input_file_name = "solit_4_4_0.txt"
+    input_file_name = "solit_4_4_1.txt"
+    # hard to solve "solit_4_13_7.txt"
     with open(join("Benchmark", input_file_name), 'r') as fh:
         data = fh.readlines()
 

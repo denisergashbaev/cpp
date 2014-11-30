@@ -1,12 +1,9 @@
-import operator
-
-
 class CardMapper(object):
     def __init__(self, num_suits, num_ranks):
         self.index_to_card = {}
         for suit in range(num_suits):
             for rank in range(num_ranks):
-                index = num_suits * suit + rank
+                index = num_ranks * suit + rank
                 card = Card(suit, rank, index)
                 if index == 0:
                     self.first_card = card
@@ -27,7 +24,8 @@ class Suit(object):
         self.value = value
 
     def __repr__(self):
-        return Suit.names[self.value][:1]
+        return str(self.value)
+        #return Suit.names[self.value][:1]
 
 
 class Card(object):
@@ -43,4 +41,4 @@ class Card(object):
         return diff == 1 or (min_v == 0 and max_v == num_ranks - 1)
 
     def __repr__(self):
-        return "%s:%s-%s" % (self.rank, self.suit, self.index)
+        return "%s:%s--ind%s" % (self.rank, self.suit, self.index)
