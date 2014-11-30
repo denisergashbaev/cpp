@@ -1,6 +1,8 @@
-from os.path import join
+from os.path import join, exists
+import time
 
 from file_operations import file_operations
+from file_operations.file_operations import get_file_names
 from solitaire.Card import CardMapper
 from solitaire.Pile import Pile
 from solitaire.Stack import Stack
@@ -8,7 +10,6 @@ from dimacs import dimacs
 
 
 class DimacsMapper(object):
-
     def __init__(self, card_mapper, cards_in_piles_count, num_turns, debug):
         self.num_turns = num_turns
         self.num_variables = cards_in_piles_count * num_turns
@@ -38,15 +39,10 @@ class DimacsMapper(object):
         for line in lines:
             self.dimacs_lines.append(line)
 
-def main():
-    debug_encoding = False
-    debug_messages = True
-    solutions_dir = "solutions"
-    cnfs_dir = "cnfs"
-    file_operations.clean_directories([solutions_dir, cnfs_dir])
-    input_file_name = "solit_4_4_1.txt"
-    # hard to solve "solit_4_13_7.txt"
-    with open(join("Benchmark", input_file_name), 'r') as fh:
+def main(debug_encoding, debug_messages, solutions_dir, cnfs_dir, benchmark_dir, cpu_time_limit, input_file_name):
+    hr_output = ""
+
+    with open(join(benchmark_dir, input_file_name), 'r') as fh:
         data = fh.readlines()
 
     cards_per_suit = 3
@@ -66,9 +62,9 @@ def main():
             index = int(l)
             pile.add_card(card_mapper.get_card(index))
 
-    print(stack)
+    hr_output += str(stack) + "\n"
     for pile in piles:
-        print(pile)
+        hr_output += str(pile) + "\n"
 
     #===modelling===#
 
@@ -176,10 +172,10 @@ def main():
 
     output = dimacs_mapper.encode()
     cnf_file_name, cnf_full_file_name = file_operations.write_cnf(cnfs_dir, input_file_name, output, dimacs_mapper.num_variables, dimacs_mapper.get_num_clauses())
-    _, sat_output_full_file_name = file_operations.call_sat_solver(solutions_dir, cnf_file_name, cnf_full_file_name)
+    _, sat_output_full_file_name = file_operations.call_sat_solver(solutions_dir, cnf_file_name, cnf_full_file_name, cpu_time_limit=cpu_time_limit)
     satisfiable, variables = file_operations.read_sat_output(sat_output_full_file_name)
     if satisfiable:
-        print "SATISFIABLE"
+        hr_output += "SATISFIABLE\n"
         card_sequence = []
         for variable in variables:
             variable = str(variable)
@@ -191,7 +187,32 @@ def main():
         ordered_cards = []
         for pair in card_sequence:
             ordered_cards.append(pair["card"])
-        print "SOLUTION: " + str(ordered_cards)
+        hr_output += "SOLUTION: " + str(ordered_cards) + "\n"
+    else:
+        hr_output += "UNSATISFIABLE\n"
+    return hr_output
 
 if __name__ == "__main__":
-    main()
+    debug_encoding = False
+    debug_messages = False
+
+    solutions_dir = "solutions"
+    cnfs_dir = "cnfs"
+    benchmark_dir = "Benchmark"
+    file_operations.clean_directories([solutions_dir, cnfs_dir])
+    input_file_name = "solit_4_4_1.txt"
+    cpu_time_limit = 10 * 60 #10mins x 60 secs
+    file_names = get_file_names(benchmark_dir)
+    file_names.sort()
+    for file_name in file_names:
+        begin = time.clock()
+        result = main(debug_encoding, debug_messages, solutions_dir, cnfs_dir, benchmark_dir, cpu_time_limit, file_name)
+        time_diff = time.clock() - begin
+        print result
+        f = join(solutions_dir, "summary")
+        mode = 'a' if exists(f) else 'w'
+        with open(f, mode) as fh:
+            fh.write("Input file: " + file_name + "\n")
+            fh.write("Time to solve: %s \n" % time_diff)
+            fh.write(result + "\n\n")
+

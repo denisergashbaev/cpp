@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.0.1, 2014-11-30T22:50:41. -->
+<!-- Written by QtCreator 3.0.1, 2014-11-30T23:15:41. -->
 <qtcreator>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -230,7 +230,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Solitaire</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/denis/PycharmProjects/cpp/CP/Solitaire/Solitaire/Solitaire.pro</value>
-    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments">/home/denis/PycharmProjects/cpp/CP/Solitaire/Solitaire/Benchmark/solit_4_4_1.txt</value>
+    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments">/home/denis/PycharmProjects/cpp/CP/Solitaire/Solitaire/Benchmark/solit_4_13_7.txt</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">Solitaire.pro</value>
     <value type="bool" key="Qt4ProjectManager.Qt4RunConfiguration.UseDyldImageSuffix">false</value>
     <value type="bool" key="Qt4ProjectManager.Qt4RunConfiguration.UseTerminal">true</value>

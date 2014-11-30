@@ -41,4 +41,4 @@ class Card(object):
         return diff == 1 or (min_v == 0 and max_v == num_ranks - 1)
 
     def __repr__(self):
-        return "%s:%s--ind%s" % (self.rank, self.suit, self.index)
+        return "%s:%s" % (self.rank, self.suit)

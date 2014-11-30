@@ -28,9 +28,12 @@ def write_cnf(cnfs_path, file_name, output, number_of_variables, number_of_claus
     return cnf_file_name, cnf_full_file_name
 
 
-def call_sat_solver(solutions_path, cnf_file_name, cnf_full_file_name):
+def call_sat_solver(solutions_path, cnf_file_name, cnf_full_file_name, cpu_time_limit=None):
     sat_output_full_file_name = abspath(join(solutions_path, cnf_file_name))
-    cmd = "minisat %s %s" % (cnf_full_file_name, sat_output_full_file_name)
+    options = ""
+    if cpu_time_limit:
+        options = "-cpu-lim=%s" % cpu_time_limit
+    cmd = "minisat %s %s %s" % (options, cnf_full_file_name, sat_output_full_file_name)
     print "calling command %s" % cmd
     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
     output = process.communicate()[0]
