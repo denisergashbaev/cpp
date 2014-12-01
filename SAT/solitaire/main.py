@@ -172,7 +172,7 @@ def main(debug_encoding, debug_messages, solutions_dir, cnfs_dir, benchmark_dir,
 
     output = dimacs_mapper.encode()
     cnf_file_name, cnf_full_file_name = file_operations.write_cnf(cnfs_dir, input_file_name, output, dimacs_mapper.num_variables, dimacs_mapper.get_num_clauses())
-    _, sat_output_full_file_name = file_operations.call_sat_solver(solutions_dir, cnf_file_name, cnf_full_file_name, cpu_time_limit=cpu_time_limit)
+    _, sat_output_full_file_name, sat_time_spent = file_operations.call_sat_solver(solutions_dir, cnf_file_name, cnf_full_file_name, cpu_time_limit=cpu_time_limit)
     satisfiable, variables = file_operations.read_sat_output(sat_output_full_file_name)
     if satisfiable:
         hr_output += "SATISFIABLE\n"
@@ -190,7 +190,7 @@ def main(debug_encoding, debug_messages, solutions_dir, cnfs_dir, benchmark_dir,
         hr_output += "SOLUTION: " + str(ordered_cards) + "\n"
     else:
         hr_output += "UNSATISFIABLE\n"
-    return hr_output
+    return hr_output, sat_time_spent
 
 if __name__ == "__main__":
     debug_encoding = False
@@ -201,18 +201,18 @@ if __name__ == "__main__":
     benchmark_dir = "Benchmark"
     file_operations.clean_directories([solutions_dir, cnfs_dir])
     input_file_name = "solit_4_4_1.txt"
-    cpu_time_limit = 10 * 60 #10mins x 60 secs
+    cpu_time_limit = 10 * 60 #10mins x 60secs
     file_names = get_file_names(benchmark_dir)
     file_names.sort()
     for file_name in file_names:
-        begin = time.clock()
-        result = main(debug_encoding, debug_messages, solutions_dir, cnfs_dir, benchmark_dir, cpu_time_limit, file_name)
-        time_diff = time.clock() - begin
+
+        result, sat_time_spent = main(debug_encoding, debug_messages, solutions_dir, cnfs_dir, benchmark_dir, cpu_time_limit, file_name)
+        #4_13_6 took a long time to solve
         print result
         f = join(solutions_dir, "summary")
         mode = 'a' if exists(f) else 'w'
         with open(f, mode) as fh:
             fh.write("Input file: " + file_name + "\n")
-            fh.write("Time to solve: %s \n" % time_diff)
+            fh.write("Time to solve: %s \n" % sat_time_spent)
             fh.write(result + "\n\n")
 

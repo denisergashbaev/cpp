@@ -1,6 +1,7 @@
 from os import unlink, listdir
 from os.path import join, isfile, abspath
 import subprocess
+import time
 
 
 def get_file_names(mypath):
@@ -35,9 +36,11 @@ def call_sat_solver(solutions_path, cnf_file_name, cnf_full_file_name, cpu_time_
         options = "-cpu-lim=%s" % cpu_time_limit
     cmd = "minisat %s %s %s" % (options, cnf_full_file_name, sat_output_full_file_name)
     print "calling command %s" % cmd
+    begin = time.clock()
     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
     output = process.communicate()[0]
-    return output, sat_output_full_file_name
+    time_diff = time.clock() - begin
+    return output, sat_output_full_file_name, time_diff
 
 
 def read_sat_output(sat_output_full_file_name):

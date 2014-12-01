@@ -3,6 +3,7 @@
 #include <gecode/search.hh>
 #include <algorithm>
 #include <iterator>
+#include <iomanip>
 
 //Knights Tour Problem
 using namespace Gecode;
@@ -16,7 +17,7 @@ public:
 
 		Matrix<IntVarArray> X(V, n, n);
 
-		//constraints
+        //Constraints
         circuit(*this, V);
 		for (int col = 0; col < X.width(); col++) {
 			for (int row = 0; row < X.height(); row++) {
@@ -32,14 +33,12 @@ public:
 				}
 
 				IntSet validMovesSet = IntSet(a, moves.size());
-				std::cout << "valid moves (intset): " << validMovesSet
-						<< std::endl;
+                //std::cout << "valid moves (intset): " << validMovesSet << std::endl;
 
 				dom(*this, X(col, row), validMovesSet);
 			}
 		}
 
-		std::cout << V << std::endl;
 		//Search
 		branch(*this, V, INT_VAR_SIZE_MIN(), INT_VAL_MIN());
 	}
@@ -97,14 +96,14 @@ public:
 			a[pos] = counter++;
 		}
 		std::cout << "Printing solutions: " << std::endl;
-		std::cout << V << std::endl;
-		std::cout << "size: " << V.size() << std::endl;
+        //std::cout << V << std::endl;
+        //std::cout << "size: " << V.size() << std::endl;
 
 		for (int i = 0; i < V.size(); i++) {
 			if (i % n == 0) {
 				std::cout<< std::endl;
 			}
-			std::cout << a[i] << " ";
+            std::cout << std::setw(5) << a[i];
 		}
 		std::cout<< std::endl;
 	}

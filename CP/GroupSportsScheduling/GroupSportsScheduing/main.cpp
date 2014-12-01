@@ -9,7 +9,7 @@
 using namespace Gecode;
 const int groupCount = 4;
 const int groupSize = 4;
-const int weekCount = 6;
+const int weekCount = 5;
 class GroupSportsScheduling: public Space {
 protected:
     IntVarArray V;
@@ -42,7 +42,7 @@ public:
         for (int col0=0; col0<X.width();col0++) {
             //next col
             for (int col1=col0+1; col1 < X.width();col1++) {
-                std::cout << ">>> col0, col1: " << col0 << "," << col1 << std::endl;
+                //std::cout << ">>> col0, col1: " << col0 << "," << col1 << std::endl;
                 int rowStep = 1; //because we take group windows of size 2
                 for (int col0_row0=0, step0 = 0; col0_row0 +  rowStep < X.height(); col0_row0 += step0) {
                     if (col0_row0 % groupSize  == groupSize - 2) {
