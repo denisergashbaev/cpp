@@ -22,7 +22,7 @@ if __name__ == "__main__":
             mysat_variables = [str(el.literal) for el in solution_formula.solution]
 
             sat_file_name = cnf_file + "_sat"
-            _, minisat_output_full_file_name = call_sat_solver(solutions_path, sat_file_name, join(cnfs_path, cnf_file))
+            _, minisat_output_full_file_name, _ = call_sat_solver(solutions_path, sat_file_name, join(cnfs_path, cnf_file))
             minisat_satisfiable, minisat_variables = read_sat_output(minisat_output_full_file_name)
 
             output = "SAT" if mysat_satisfiable else "UNSAT"

@@ -26,7 +26,7 @@ file_names = get_file_names(graph_paths)
 file_names.sort()
 for file_name in file_names:
     cnf_file_name, cnf_full_file_name = cnf_converter.convert_to_cnf(graph_paths, file_name)
-    output, sat_output_full_file_name = call_sat_solver(solutions_path, cnf_file_name, cnf_full_file_name)
+    output, sat_output_full_file_name, _ = call_sat_solver(solutions_path, cnf_file_name, cnf_full_file_name)
     satisfiable, variables = read_sat_output(sat_output_full_file_name)
     f = join(solutions_path, "summary")
     mode = 'a' if exists(f) else 'w'
