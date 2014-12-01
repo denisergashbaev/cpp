@@ -2,6 +2,7 @@ from os.path import join
 import itertools
 
 from dimacs.dimacs import encode
+from file_operations.file_operations import write_cnf, call_sat_solver, read_sat_output
 
 
 def create_matrix(mypath, graph_name):
@@ -133,7 +134,7 @@ def convert_to_cnf(file_name):
 
     cnf_file_name, cnf_full_file_name = write_cnf(cnfs_path, file_name, output, number_of_vars, number_of_clauses)
 
-    sat_output, sat_output_full_file_name = call_sat_solver(solutions_path, cnf_file_name, cnf_full_file_name)
+    sat_output, sat_output_full_file_name, _ = call_sat_solver(solutions_path, cnf_file_name, cnf_full_file_name)
 
     sat_satisfiable, sat_variables = read_sat_output(sat_output_full_file_name)
 
