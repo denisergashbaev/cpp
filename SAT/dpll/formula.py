@@ -1,4 +1,4 @@
-from dpll import CommonEqualityMixin
+from dpll.CommonEqualityMixin import CommonEqualityMixin
 
 
 class Literal(CommonEqualityMixin):

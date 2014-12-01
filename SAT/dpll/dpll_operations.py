@@ -1,6 +1,5 @@
 from copy import deepcopy
-
-from dpll.formula import Clause
+from formula import Clause
 
 
 def unit_propagation(formula):

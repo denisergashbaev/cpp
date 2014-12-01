@@ -1,7 +1,7 @@
 from os.path import join
 
-from dpll import dpll
-import dimacs_reader
+from dpll import dimacs_reader
+from dpll import dpll_operations
 from file_operations.file_operations import call_sat_solver, read_sat_output, get_file_names
 from sudoku.cnf_converter import create_matrix, write_human_readable
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         for cnf_file in get_file_names(cnfs_path):
             print "=================\n"
             print "reading file %s\n" % cnf_file
-            mysat_satisfiable, solution_formula = dpll.dpll(dimacs_reader.read_cnf_output(cnfs_path, cnf_file))
+            mysat_satisfiable, solution_formula = dpll_operations.dpll(dimacs_reader.read_cnf_output(cnfs_path, cnf_file))
             mysat_variables = [str(el.literal) for el in solution_formula.solution]
 
             sat_file_name = cnf_file + "_sat"
