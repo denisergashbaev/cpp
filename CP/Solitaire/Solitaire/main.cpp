@@ -43,7 +43,7 @@ void printSolitaireSolution(IntVarArray V, std::vector <int> cardIndexes) {
         for (int j = 0; j < V.size(); j++) {
             int value = V[j].val();
             if (i == value) {
-                std::cout << std::setw(5) << getRank(cardIndexes[j]) << ":" << getSuit(cardIndexes[j]);
+                std::cout << getRank(cardIndexes[j]) << ":" << getSuit(cardIndexes[j]) << ", ";
                 break;
             }
         }
