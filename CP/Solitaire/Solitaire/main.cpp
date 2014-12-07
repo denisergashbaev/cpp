@@ -19,11 +19,6 @@ int getRank(int index){
     return index % numRanks;
 }
 
-std::string getCard(int index) {
-    std::string ret = getRank(index) + ":" + getSuit(index);
-    return ret;
-}
-
 bool isValidNeighbor(int rank, int otherRank, int numRanks) {
     int minRank = std::min(rank, otherRank);
     int maxRank = std::max(rank, otherRank);
@@ -46,7 +41,7 @@ void printSolitareInput(std::vector <int> cardIndexes){
 }
 
 void printSolitaireSolution(IntVarArray V, std::vector <int> cardIndexes) {
-    std::cout << V << std::endl;
+    //std::cout << V << std::endl;
     for (int i = 0; i < V.size(); i++) {
         for (int j = 0; j < V.size(); j++) {
             int value = V[j].val();
@@ -97,6 +92,7 @@ public:
                 rel(*this, V[i], IRT_GR, 0);
             }
         }
+
         for (int i = 0; i < V.size(); i++) {
             int card0 = cardIndexes[i];
             for (int j = i + 1; j < V.size(); j++) {
@@ -110,13 +106,43 @@ public:
             }
         }
 
-//        for (int i = 0; i < V.size(); i++) {
-//            for (int j = i + 1; j < V.size(); j++) {
-//                rel(*this, abs(V[i] % numRanks - V[j] % numRanks) == 1 || (min(V[i] % numRanks, V[j] % numRanks) == 0 && max(V[i] % numRanks, V[j] % numRanks) == numRanks - 1));
-//            }
-//        }
-        //Search
-        branch(*this, V, INT_VAR_NONE(), INT_VAL_MIN());
+        // ====== IMPROVING THE MODEL ======
+
+
+        //started with this branching strategy
+        //branch(*this, V, INT_VAR_NONE(), INT_VAL_MIN());
+
+
+        //These two do not improve the performance of the 4_7_* instances
+        //branch(*this, V, INT_VAR_SIZE_MIN(), INT_VAL_MIN());
+        //branch(*this, V,  INT_VAR_MERIT_MIN(&mer), INT_VAL(&v));
+
+
+        //adding additional constraints
+        for (int i = 0; i < V.size(); i++) {
+            int level = i % pileSize;
+            if (level == 0) {
+                rel(*this, V[i], IRT_GR, 1);
+            } else if (level == 1) {
+                rel(*this, V[i], IRT_GR, 1);
+            } else if (level == 2) {
+                rel(*this, V[i], IRT_LE, numSuits * numRanks - 2 - 2);
+            }
+        }
+        //and random branching strategy, now the 4_7_* instances work too
+        Rnd r(1U);
+        branch(*this, V, tiebreak(INT_VAR_SIZE_MIN(), INT_VAR_RND(r)), INT_VAL_RND(r));
+
+    }
+
+    static double mer(const Space& home, IntVar x, int i) {
+      double val = i % pileSize; //is the size of the stack
+      return val;
+    }
+
+    static int v(const Space& home, IntVar x, int i) {
+      int bestval = x.min();
+      return bestval;
     }
 
     Solitare(bool share, Solitare& s) : Space(share, s) {
