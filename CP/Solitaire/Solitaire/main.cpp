@@ -34,7 +34,7 @@ void printSolitareInput(std::vector <int> cardIndexes){
             int ind = pileSize * i + j;
             int card = cardIndexes[ind];
             std::cout << std::setw(5) << getRank(card) << ":" << getSuit(card);
-            std::cout << ",i:" << ind << "c:"<< card;
+            //std::cout << ",i:" << ind << "c:"<< card;
         }
         std::cout<<std::endl;
     }
