@@ -9,7 +9,7 @@ do
 f=$(readlink -e $i)
 echo "calling ./main $f \n"
 start=$(date +%s%N)
-OUTPUT=$(timeout 600s ./main  $f)
+OUTPUT=$(timeout 30s ./main  $f)
 end=$(date +%s%N)
 time_diff=$(((end-start)/1000000))
 echo -e "" >> $SOLUTIONS_FILE

@@ -34,7 +34,7 @@ void printSolitareInput(std::vector <int> cardIndexes){
             int ind = pileSize * i + j;
             int card = cardIndexes[ind];
             std::cout << std::setw(5) << getRank(card) << ":" << getSuit(card);
-            //std::cout << ",i:" << ind << "c:"<< card;
+            std::cout << ",i:" << ind << "c:"<< card;
         }
         std::cout<<std::endl;
     }
@@ -73,7 +73,7 @@ public:
         int stackCount = V.size()/pileSize;
         for(int i = 0; i < stackCount; i++) {
             //std::cout << "deck " << i << std::endl;
-            for (int j = 0; j < pileSize - 1; j++) {
+            for (int j = 0; j < pileSize - 1; j ++) {
                 int index0 = pileSize * i + j;
                 int index1 = index0 + 1;
                 //int card0 = cardIndexes[index0];
@@ -109,34 +109,69 @@ public:
         // ====== IMPROVING THE MODEL ======
 
 
-        //started with this branching strategy
+//one attempt..: adding additional constraints for some of the cards
+//        for (int i = 0; i < V.size(); i++) {
+//            int level = i % pileSize;
+//            if (level == 0) {
+//                rel(*this, V[i], IRT_GR, 1);
+//            } else if (level == 1) {
+//                rel(*this, V[i], IRT_GR, 0);
+//                rel(*this, V[i], IRT_LE, numSuits * numRanks - 2 - 1);
+//            } else if (level == 2) {
+//                rel(*this, V[i], IRT_LE, numSuits * numRanks - 2 - 2);
+//            }
+//        }
+
+
+
+//experimenting with dom constraints instead of rel
+//                for (int i = 0; i < V.size(); i++) {
+//                    int level = i % pileSize;
+//                    if (level == 0) {
+//                        dom(*this, V[i], IntSet(1, numSuits * numRanks - 2));
+//                    } else if (level == 1) {
+//                        dom(*this, V[i], IntSet(0, numSuits * numRanks - 2 - 1));
+//                    } else if (level == 2) {
+//                        dom(*this, V[i], IntSet(0, numSuits * numRanks - 2 - 2));
+//                    }
+//                }
+
+//another attempt...: reversing the constraints on the pile
+//        for(int i = 0; i < stackCount; i++) {
+//            //std::cout << "deck " << i << std::endl;
+//            for (int j = pileSize - 1; j > 1; j--) {
+//                int index0 = pileSize * i + j;
+//                int index1 = index0 - 1;
+//                rel(*this, V[index0], IRT_LE, V[index1]);
+//            }
+//        }
+
+
+//started with this branching strategy
         //branch(*this, V, INT_VAR_NONE(), INT_VAL_MIN());
 
-
+//many other experiments with branching strategies...
+        Rnd r(1U);
         //These two do not improve the performance of the 4_7_* instances
         //branch(*this, V, INT_VAR_SIZE_MIN(), INT_VAL_MIN());
         //branch(*this, V,  INT_VAR_MERIT_MIN(&mer), INT_VAL(&v));
+        //branch(*this, V,  tiebreak(INT_VAR_DEGREE_MAX(), INT_VAR_MERIT_MIN(&mer)), INT_VAL_MIN());
+        //branch(*this, V,  INT_VAR_DEGREE_MAX(), INT_VAL_MIN());
 
-
-        //adding additional constraints
-        for (int i = 0; i < V.size(); i++) {
-            int level = i % pileSize;
-            if (level == 0) {
-                rel(*this, V[i], IRT_GR, 1);
-            } else if (level == 1) {
-                rel(*this, V[i], IRT_GR, 1);
-            } else if (level == 2) {
-                rel(*this, V[i], IRT_LE, numSuits * numRanks - 2 - 2);
-            }
-        }
         //and random branching strategy, now the 4_7_* instances work too
-        Rnd r(1U);
-        branch(*this, V, tiebreak(INT_VAR_SIZE_MIN(), INT_VAR_RND(r)), INT_VAL_RND(r));
+        //branch(*this, V, tiebreak(INT_VAR_SIZE_MIN(), INT_VAR_RND(r)), INT_VAL_RND(r));
+
+
+//This branching strategy seems most sensible:
+        //prefer the cards which are on top of the pile INT_VAR_MERIT_MAX, resolve the tie breaks by preferring a variable with most constraints -- INT_VAR_DEGREE_MAX
+
+        branch(*this, V, tiebreak(INT_VAR_MERIT_MAX(&mer), INT_VAR_DEGREE_MAX()), INT_VALUES_MIN());
 
     }
 
+    //infer the 'merit' of a card based on where it is located on the pile
     static double mer(const Space& home, IntVar x, int i) {
-      double val = i % pileSize; //is the size of the stack
+      double val = i % pileSize; //is the size of the stack: 0 - behind others, 2 - on top
       return val;
     }
 
