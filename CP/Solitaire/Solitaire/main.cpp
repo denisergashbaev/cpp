@@ -8,7 +8,7 @@ using namespace Gecode;
 int numSuits;
 int numRanks;
 std::vector<int> inputDeck;
-int stackSize = 3;
+int pileSize = 3;
 
 
 int getSuit(int index){
@@ -27,11 +27,11 @@ bool isValidNeighbor(int rank, int otherRank, int numRanks) {
 }
 
 void printSolitareInput(std::vector <int> cardIndexes){
-    int stackCount = cardIndexes.size()/stackSize;
+    int stackCount = cardIndexes.size()/pileSize;
     for (int i=0; i<stackCount; i++) {
-        for (int j=0; j < stackSize; j++) {
+        for (int j=0; j < pileSize; j++) {
             //std::cout << "index: " << stackCount * i + j << std::endl;
-            int card = cardIndexes[stackSize * i + j];
+            int card = cardIndexes[pileSize * i + j];
             std::cout << std::setw(5) << getRank(card) << ":" << getSuit(card);
         }
         std::cout<<std::endl;
@@ -63,22 +63,22 @@ public:
         //1. the positions should be distinct
         distinct(*this, V);
 
-        //2. in each deck, the bottom card can only have a higher position than the card that is on top of it:
+        //2. in each pile, the bottom card can only have a higher position than the card that is on top of it:
         //that is, it may only be placed on the deck if the card before it is already on the deck and thus has uncovered it
-        int stackCount = V.size()/stackSize;
+        int stackCount = V.size()/pileSize;
         for(int i = 0; i < stackCount; i++) {
             //std::cout << "deck " << i << std::endl;
-            for (int j = 0; j < stackSize - 1; j++) {
-                int index0 = stackSize * i + j;
+            for (int j = 0; j < pileSize - 1; j++) {
+                int index0 = pileSize * i + j;
                 int index1 = index0 + 1;
-                int card0 = inputDeck[index0];
-                int card1 = inputDeck[index1];
+                //int card0 = inputDeck[index0];
+                //int card1 = inputDeck[index1];
                 //std::cout << "constraining " << getRank(card0) << ":" << getSuit(card0) << " and " << getRank(card1) << ":" << getSuit(card1) << std::endl;
                 rel(*this, V[index0] > V[index1]);
             }
         }
 
-        //3. If two cards have a "rank jump" with a value of more than 1 unit, they can not be consequtive
+        //3. If two cards have a "rank jump" with a value of more than 1 unit, they can not be consecutive
         for (int i = 0; i < V.size(); i++) {
             if (i == 0) {
                 int index0 = 0;
@@ -109,7 +109,7 @@ public:
         //std::cout << "V: " << V << std::endl;
         //std::cout << "V.size=" << V.size() << std::endl;
 
-        std::cout << std::endl << "Solution: " << std::endl;
+        std::cout << std::endl << "Solution:\n " << std::endl;
         printSolitaireSolution(V, inputDeck);
     }
 };
@@ -118,7 +118,7 @@ public:
 
 int main(int argc, char** argv){
     if(argc !=2){
-        std::cout<< "The only parameter should be the file name: "<<std::endl;
+        std::cout<< "Please provide an absolute path to the input file"<<std::endl;
         exit(1);
     }
 
@@ -140,7 +140,7 @@ int main(int argc, char** argv){
     Solitare* s = new Solitare;
     DFS<Solitare> e(s);
     delete s;
-    std::cout << "Printing solution (if available): " << std::endl;
+    std::cout << "Printing solution (if available):\n" << std::endl;
     if(Solitare* t = e.next()){
         t->print();
         delete t;
